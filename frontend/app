@@ -1,0 +1,48 @@
+# frontend_service/app.py
+from flask import Flask, render_template, request, jsonify
+import requests
+
+app = Flask(__name__)
+
+# URLs for the task service and API gateway
+TASK_SERVICE_URL = "http://localhost:3001"
+API_GATEWAY_URL = "http://localhost:3003"
+
+@app.route('/add', methods=['GET', 'POST'])
+def add_task():
+    if request.method == 'POST':
+        task = request.form.get('task')
+        if task:
+            # Send a POST request to the task service to add the task
+            response = requests.post(f"{TASK_SERVICE_URL}/tasks/add", json={"task": task})
+            if response.status_code == 200:
+                return redirect('/add')
+            else:
+                return "Failed to add the task."
+
+    return render_template('add_task.html')
+
+@app.route('/tasks', methods=['GET', 'POST'])
+def list_tasks():
+    if request.method == 'POST':
+        task_index = int(request.form.get('task_index'))
+        if 0 <= task_index < len(tasks):
+            # Send a POST request to the task service to delete the task
+            response = requests.post(f"{TASK_SERVICE_URL}/tasks", data={"task_index": task_index})
+            if response.status_code == 200:
+                return redirect('/tasks')
+            else:
+                return "Failed to delete the task."
+
+    # Retrieve the task list from the task service
+    response = requests.get(f"{TASK_SERVICE_URL}/tasks")
+    if response.status_code == 200:
+        tasks = response.json().get("tasks")
+    else:
+        tasks = []
+
+    return render_template('list_tasks.html', tasks=tasks)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=3000)
+

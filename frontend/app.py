@@ -4,7 +4,7 @@ import requests
 app = Flask(__name__)
 
 # Update the backend URL to use the service name 'backend'
-backend_url = "http://backend:3001"  
+backend_url = "http://backend-service:3001"  
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_task():
